@@ -1,0 +1,110 @@
+# configs/stage1_gradient_scale_noIC.yaml
+device: "auto"
+dtype: "float32"
+
+experiment:
+  name: "stage1_gradient_scale_noIC"
+  out_dir: "outputs"
+
+ic_embedding:
+  gate: "exp"   # "exp" or "linear"
+  alpha: 1.0
+
+single:
+  # sweep: 4 ks × 20 seeds
+  k_values: [10, 20, 60, 80]
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  ic:
+    r0: 1.0
+    theta0: 0.2
+    rdot0: 0.0
+    thetadot0: 0.0
+    hard_velocity: false
+
+problem:
+  name: "spring_pendulum"
+  T: 10.0
+  g: 9.81
+  m: 1.0
+  L0: 1.0
+  c_r: 0.0
+  c_theta: 0.0
+  r_min: 1.0e-4
+
+reference:
+  solver: "solve_ivp"
+  method: "DOP853"
+  rtol: 1.0e-10
+  atol: 1.0e-12
+  eval_points: 2000
+
+collocation:
+  interior_points: 2000
+  sampling: "uniform"
+  ic_points: 20
+
+spectral_trunk:
+  enabled: true
+  fixed_basis: "fourier"
+  include_bias: false
+  omega_dtype: "float32"
+
+  fourier:
+    spacing: "log"
+    bands:
+      low:  { n: 16, w_min: 0.5, w_max: 5.0 }
+      mid:  { n: 16, w_min: 5.0, w_max: 15.0 }
+      high: { n: 0,  w_min: 0.0, w_max: 0.0 }
+
+  chebyshev:
+    degree: 16
+    normalize_features: true
+    time_normalization: "affine_to_minus1_1"
+
+models:
+  run:
+    - "baseline_pinn"
+    - "fixed_spectral_pinn"
+    - "adaptive_spectral_pinn"
+    # keep cascaded only if you want it as a *debug* sanity check:
+    # - "cascaded_pinn"
+
+baseline_pinn:
+  hidden_layers: [128, 128, 128]
+  activation: "tanh"
+
+cascaded_pinn:
+  blocks: 3
+  hidden_layers: [128, 128, 128]
+  activation: "tanh"
+  bias: true
+  training:
+    freeze_previous: true
+    sampling_mode: "reweight"
+    residual_reweight:
+      power: 1.0
+      eps: 1e-12
+
+fixed_spectral_pinn:
+  head_bias: true
+  head_init: "small_normal"
+  fourier_init_std: 1.0e-2
+  cheby_init_std: 1.0e-3
+
+adaptive_spectral_pinn:
+  positive_omegas: true
+  softplus_beta: 1.0
+  head_bias: true
+  head_init: "small_normal"
+
+training:
+  optimizer: "adam"
+  lr: 1e-3
+  weight_decay: 0.0
+  steps: 5000 
+  log_every: 500
+  eval_every: 500
+
+loss:
+  lambda_phys: 1.0
+  lambda_ic: 0.0
