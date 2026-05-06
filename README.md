@@ -1,8 +1,9 @@
 # Gradient Scaling Effects in Adaptive Spectral PINNs for Stiff Nonlinear ODEs — Paper Reproduction
 
-This repository contains the unified Stage 1 runner for spring–pendulum PINN experiments,
-along with plotting and statistical analysis scripts used in the ICLR 2026 AI & PDE Workshop and Arxiv
-paper on gradient scaling effects.
+This repository contains code for spring–pendulum PINN experiments,
+along with plotting and statistical analysis scripts used in the ICLR 2026 AI & PDE Workshop and arXiv
+paper on gradient scaling effects. Precomputed experiment outputs are available in the GitHub release `v1.0-arxiv`.
+Download `outputs.zip`, unzip it inside `repo/`
 
 ---
 
