@@ -1,4 +1,10 @@
 # training/losses.py
+# Note: the arXiv paper writes the squared residual loss with the conventional
+# 1/2 prefactor in the NTK derivation. However, the experiments in the arXiv paper, and the code here
+# use the MSE without the 1/2. This only rescales the
+# physics-gradient contribution by a constant and can be absorbed into
+# lambda_phys or the optimization time scale.
+
 from __future__ import annotations
 
 from dataclasses import dataclass
